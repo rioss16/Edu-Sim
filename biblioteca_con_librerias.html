@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Digital - Subir Libros</title>
+    
+    <!-- Font Awesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- SweetAlert2 para alertas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.0.0/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.0.0/sweetalert2.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --color-primario: #4f46e5;
+            --color-secundario: #06b6d4;
+            --color-acento: #f59e0b;
+            --color-exito: #10b981;
+            --color-biblioteca: #8b5cf6;
+            --color-fondo: #f8fafc;
+            --color-texto: #1e293b;
+            --color-blanco: #ffffff;
+            --color-error: #ef4444;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--color-fondo) 0%, #f3e8ff 100%);
+            color: var(--color-texto);
+            line-height: 1.6;
+        }
+
+        /* ENCABEZADO */
+        .encabezado {
+            background: var(--color-blanco);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .contenedor-encabezado {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-primario);
+            text-decoration: none;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .nav-botones {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .boton-nav {
+            background: var(--color-biblioteca);
+            color: var(--color-blanco);
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .boton-nav:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+
+        .boton-subir {
+            background: var(--color-exito);
+        }
+
+        .boton-subir:hover {
+            background: #059669;
+        }
+
+        /* SECCIÓN PRINCIPAL */
+        .contenedor-principal {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8rem 2rem 2rem;
+        }
+
+        /* FORMULARIO DE SUBIDA */
+        .seccion-subida {
+            background: var(--color-blanco);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .titulo-seccion {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--color-texto);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .subtitulo-seccion {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .formulario-libro {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .campo-completo {
+            grid-column: 1 / -1;
+        }
+
+        .grupo-campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .etiqueta-campo {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--color-texto);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .campo-entrada, .campo-select, .campo-textarea {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--color-blanco);
+        }
+
+        .campo-entrada:focus, .campo-select:focus, .campo-textarea:focus {
+            outline: none;
+            border-color: var(--color-biblioteca);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .campo-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .campo-archivo {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .boton-archivo {
+            background: var(--color-biblioteca);
+            color: var(--color-blanco);
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .boton-archivo:hover {
+            background: #7c3aed;
+        }
+
+        .input-archivo {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .info-archivo {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f1f5f9;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .preview-contenido {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .botones-formulario {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .boton-enviar, .boton-limpiar {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .boton-enviar {
+            background: var(--color-exito);
+            color: var(--color-blanco);
+        }
+
+        .boton-enviar:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .boton-limpiar {
+            background: #6b7280;
+            color: var(--color-blanco);
+        }
+
+        .boton-limpiar:hover {
+            background: #4b5563;
+        }
+
+        /* LISTA DE LIBROS SUBIDOS */
+        .seccion-libros-subidos {
+            background: var(--color-blanco);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .grid-libros {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tarjeta-libro {
+            background: var(--color-blanco);
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tarjeta-libro:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-biblioteca);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+        }
+
+        .cabecera-libro {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .icono-libro {
+            font-size: 2.5rem;
+            color: var(--color-biblioteca);
+        }
+
+        .menu-libro {
+            position: relative;
+        }
+
+        .boton-menu {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .boton-menu:hover {
+            background: #f1f5f9;
+            color: var(--color-biblioteca);
+        }
+
+        .menu-opciones {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--color-blanco);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 100;
+            min-width: 150px;
+        }
+
+        .opcion-menu {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .opcion-menu:hover {
+            background: #f8fafc;
+        }
+
+        .opcion-menu.eliminar:hover {
+            background: #fef2f2;
+            color: var(--color-error);
+        }
+
+        .titulo-libro {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--color-texto);
+        }
+
+        .autor-libro {
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .categoria-libro {
+            background: var(--color-biblioteca);
+            color: var(--color-blanco);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .descripcion-libro {
+            color: #475569;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .info-archivo-libro {
+            background: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .acciones-libro {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .boton-accion {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+
+        .boton-leer {
+            background: var(--color-biblioteca);
+            color: var(--color-blanco);
+        }
+
+        .boton-leer:hover {
+            background: #7c3aed;
+        }
+
+        .boton-descargar {
+            background: #f1f5f9;
+            color: var(--color-texto);
+            border: 1px solid #e2e8f0;
+        }
+
+        .boton-descargar:hover {
+            background: #e2e8f0;
+        }
+
+        /* MODAL LECTOR */
+        .modal-lector {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+        }
+
+        .contenedor-lector {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            height: 90%;
+            margin: 5% auto;
+            background: var(--color-blanco);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .cabecera-lector {
+            background: var(--color-biblioteca);
+            color: var(--color-blanco);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .boton-cerrar {
+            background: none;
+            border: none;
+            color: var(--color-blanco);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .boton-cerrar:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .contenido-lector {
+            height: calc(100% - 80px);
+            padding: 2rem;
+            overflow-y: auto;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        /* ESTADO VACÍO */
+        .estado-vacio {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+
+        .estado-vacio i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .formulario-libro {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .contenedor-principal {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .nav-botones {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .botones-formulario {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .boton-enviar, .boton-limpiar {
+                width: 200px;
+            }
+
+            .grid-libros {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ANIMACIONES */
+        @keyframes aparecer {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tarjeta-libro {
+            animation: aparecer 0.5s ease forwards;
+        }
+
+        .cargando {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: girar 1s ease-in-out infinite;
+        }
+
+        @keyframes girar {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- ENCABEZADO -->
+    <header class="encabezado">
+        <div class="contenedor-encabezado">
+            <a href="#" class="logo">
+                <i class="fas fa-book-open"></i>
+                Biblioteca Digital
+            </a>
+            <div class="nav-botones">
+                <a href="#subir" class="boton-nav boton-subir">
+                    <i class="fas fa-upload"></i>
+                    Subir Libro
+                </a>
+                <a href="#biblioteca" class="boton-nav">
+                    <i class="fas fa-books"></i>
+                    Ver Biblioteca
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="contenedor-principal">
+        <!-- SECCIÓN DE SUBIDA -->
+        <section class="seccion-subida" id="subir">
+            <h1 class="titulo-seccion">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Subir Nuevo Libro
+            </h1>
+            <p class="subtitulo-seccion">
+                Comparte tus libros con la comunidad. Formatos soportados: PDF, TXT, DOCX, EPUB
+            </p>
+
+            <form class="formulario-libro" id="formularioLibro">
+                <div class="grupo-campo">
+                    <label class="etiqueta-campo">
+                        <i class="fas fa-book"></i>
+                        Título del libro
+                    </label>
+                    <input type="text" class="campo-entrada" id="titulo" placeholder="Ej: El Quijote" required>
+                </div>
+
+                <div class="grupo-campo">
+                    <label class="etiqueta-campo">
+                        <i class="fas fa-user"></i>
+                        Autor
+                    </label>
+                    <input type="text" class="campo-entrada" id="autor" placeholder="Ej: Miguel de Cervantes" required>
+                </div>
+
+                <div class="grupo-campo">
+                    <label class="etiqueta-campo">
+                        <i class="fas fa-tags"></i>
+                        Categoría
+                    </label>
+                    <select class="campo-select" id="categoria" required>
+                        <option value="">Seleccionar categoría</option>
+                        <option value="cuentos">Cuentos Infantiles</option>
+                        <option value="matematicas">Matemáticas</option>
+                        <option value="ciencias">Ciencias</option>
+                        <option value="historia">Historia</option>
+                        <option value="geografia">Geografía</option>
+                        <option value="ingles">Inglés</option>
+                        <option value="literatura">Literatura</option>
+                        <option value="filosofia">Filosofía</option>
+                        <option value="arte">Arte</option>
+                        <option value="musica">Música</option>
+                    </select>
+                </div>
+
+                <div class="grupo-campo">
+                    <label class="etiqueta-campo">
+                        <i class="fas fa-graduation-cap"></i>
+                        Grado educativo
+                    </label>
+                    <select class="campo-select" id="grado" required>
+                        <option value="">Seleccionar grado</option>
+                        <option value="Preescolar">Preescolar</option>
+                        <option value="Primaria">Primaria</option>
+                        <option value="Secundaria">Secundaria</option>
+                        <option value="Media">Media</option>
+                        <option value="Universidad">Universidad</option>
+                        <option value="Adultos">Adultos</option>
+                    </select>
+                </div>
+
+                <div class="grupo-campo campo-completo">
+                    <label class="etiqueta-campo">
+                        <i class="fas fa-align-left"></i>
+                        Descripción
+                    </label>
+                    <textarea class="campo-textarea" id="descripcion" placeholder="Breve descripción del contenido del libro..." required></textarea>
+                </div>
+
+                <div class="grupo-campo campo-completo">
+                    <label class="etiqueta-campo">
+                        <i class="fas fa-file-upload"></i>
+                        Archivo del libro
+                    </label>
+                    <div class="campo-archivo">
+                        <button type="button" class="boton-archivo" onclick="document.getElementById('archivo').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Seleccionar archivo
+                        </button>
+                        <input type="file" id="archivo" class="input-archivo" accept=".pdf,.txt,.docx,.epub" required>
+                    </div>
+                    <div class="info-archivo" id="infoArchivo"></div>
+                    <div class="preview-contenido" id="previewContenido"></div>
+                </div>
+
+                <div class="botones-formulario campo-completo">
+                    <button type="submit" class="boton-enviar">
+                        <i class="fas fa-check"></i>
+                        Subir Libro
+                    </button>
+                    <button type="button" class="boton-limpiar" onclick="limpiarFormulario()">
+                        <i class="fas fa-eraser"></i>
+                        Limpiar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- SECCIÓN DE LIBROS SUBIDOS -->
+        <section class="seccion-libros-subidos" id="biblioteca">
+            <h2 class="titulo-seccion">
+                <i class="fas fa-books"></i>
+                Libros en la Biblioteca
+            </h2>
+            
+            <div class="grid-libros" id="gridLibros">
+                <!-- Los libros se mostrarán aquí -->
+            </div>
+
+            <div class="estado-vacio" id="estadoVacio" style="display: none;">
+                <i class="fas fa-book-open"></i>
+                <h3>No hay libros en la biblioteca</h3>
+                <p>¡Sé el primero en subir un libro!</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODAL LECTOR -->
+    <div class="modal-lector" id="modalLector">
+        <div class="contenedor-lector">
+            <div class="cabecera-lector">
+                <h3 id="tituloLibroModal">
+                    <i class="fas fa-book-open"></i>
+                    Título del Libro
+                </h3>
+                <button class="boton-cerrar" onclick="cerrarLector()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="contenido-lector" id="contenidoLibro">
+                <!-- Contenido del libro -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ALMACENAMIENTO DE LIBROS
+        let librosSubidos = JSON.parse(localStorage.getItem('librosSubidos')) || [];
+        let contadorLibros = parseInt(localStorage.getItem('contadorLibros')) || 1;
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', function() {
+            configurarEventos();
+            mostrarLibros();
+            
+            // Mensaje de bienvenida
+            setTimeout(() => {
+                Swal.fire({
+                    title: '¡Bienvenido!',
+                    text: 'Aquí puedes subir y gestionar tus libros',
+                    icon: 'success',
+                    confirmButtonColor: '#8b5cf6',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }, 1000);
+        });
+
+        // CONFIGURAR EVENTOS
+        function configurarEventos() {
+            // Evento del formulario
+            document.getElementById('formularioLibro').addEventListener('submit', subirLibro);
+            
+            // Evento del archivo
+            document.getElementById('archivo').addEventListener('change', manejarArchivoSeleccionado);
+            
+            // Scroll suave para navegación
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Cerrar menús al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.menu-libro')) {
+                    document.querySelectorAll('.menu-opciones').forEach(menu => {
+                        menu.style.display = 'none';
+                    });
+                }
+            });
+        }
+
+        // MANEJAR ARCHIVO SELECCIONADO
+        function manejarArchivoSeleccionado(event) {
+            const archivo = event.target.files[0];
+            const infoArchivo = document.getElementById('infoArchivo');
+            const previewContenido = document.getElementById('previewContenido');
+            
+            if (archivo) {
+                // Mostrar información del archivo
+                const tamaño = (archivo.size / 1024 / 1024).toFixed(2);
+                infoArchivo.innerHTML = `
+                    <i class="fas fa-file"></i>
+                    <strong>Archivo:</strong> ${archivo.name}<br>
+                    <i class="fas fa-weight"></i>
+                    <strong>Tamaño:</strong> ${tamaño} MB<br>
+                    <i class="fas fa-file-alt"></i>
+                    <strong>Tipo:</strong> ${archivo.type || 'Desconocido'}
+                `;
+                infoArchivo.style.display = 'block';
+                
+                // Preview para archivos de texto
+                if (archivo.type === 'text/plain' || archivo.name.endsWith('.txt')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const contenido = e.target.result;
+                        previewContenido.textContent = contenido.substring(0, 500) + (contenido.length > 500 ? '...' : '');
+                        previewContenido.style.display = 'block';
+                    };
+                    reader.readAsText(archivo);
+                } else {
+                    previewContenido.style.display = 'none';
+                }
+                
+                // Actualizar botón
+                document.querySelector('.boton-archivo').innerHTML = `
+                    <i class="fas fa-check"></i>
+                    Archivo seleccionado
+                `;
+                document.querySelector('.boton-archivo').style.background = '#10b981';
+            }
+        }
+
+        // SUBIR LIBRO
+        async function subirLibro(event) {
+            event.preventDefault();
+            
+            const botonEnviar = document.querySelector('.boton-enviar');
+            const botonOriginal = botonEnviar.innerHTML;
+            
+            // Mostrar loading
+            botonEnviar.innerHTML = '<div class="spinner"></div> Subiendo...';
+            botonEnviar.disabled = true;
+            
+            try {
+                // Obtener datos del formulario
+                const formData = new FormData();
+                const titulo = document.getElementById('titulo').value;
+                const autor = document.getElementById('autor').value;
+                const categoria = document.getElementById('categoria').value;
+                const grado = document.getElementById('grado').value;
+                const descripcion = document.getElementById('descripcion').value;
+                const archivo = document.getElementById('archivo').files[0];
+                
+                // Validaciones
+                if (!archivo) {
+                    throw new Error('Por favor selecciona un archivo');
+                }
+                
+                if (archivo.size > 50 * 1024 * 1024) { // 50MB límite
+                    throw new Error('El archivo es demasiado grande (máximo 50MB)');
+                }
+                
+                // Leer contenido del archivo
+                let contenidoArchivo = '';
+                if (archivo.type === 'text/plain') {
+                    contenidoArchivo = await leerArchivoComoTexto(archivo);
+                } else {
+                    contenidoArchivo = `[Archivo ${archivo.type}: ${archivo.name}]`;
+                }
+                
+                // Crear objeto libro
+                const nuevoLibro = {
+                    id: contadorLibros++,
+                    titulo: titulo,
+                    autor: autor,
+                    categoria: categoria,
+                    grado: grado,
+                    descripcion: descripcion,
+                    archivo: {
+                        nombre: archivo.name,
+                        tipo: archivo.type,
+                        tamaño: archivo.size
+                    },
+                    contenido: contenidoArchivo,
+                    fechaSubida: new Date().toLocaleDateString('es-CO'),
+                    icono: obtenerIconoPorCategoria(categoria)
+                };
+                
+                // Simular subida
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Guardar en localStorage
+                librosSubidos.push(nuevoLibro);
+                localStorage.setItem('librosSubidos', JSON.stringify(librosSubidos));
+                localStorage.setItem('contadorLibros', contadorLibros);
+                
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'El libro se ha subido correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#4caf50',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+                
+                // Reiniciar formulario
+                document.getElementById('formularioLibro').reset();
+                document.getElementById('previewContenido').style.display = 'none';
+                document.getElementById('infoArchivo').style.display = 'none';
+                document.querySelector('.boton-archivo').innerHTML = `
+                    Seleccionar archivo
+                    <i class="fas fa-cloud-upload-alt"></i>
+                `;
+                document.querySelector('.boton-archivo').style.background = 'var(--color-biblioteca)';
+                
+                // Actualizar lista de libros
+                mostrarLibros();
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    title: 'Error',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444'
+                });
+            } finally {
+                botonEnviar.disabled = false;
+                botonEnviar.innerHTML = botonOriginal;
+            }
+        }
+
+        // MOSTRAR LIBROS
+        function mostrarLibros() {
+            const gridLibros = document.getElementById('gridLibros');
+            const estadoVacio = document.getElementById('estadoVacio');
+            
+            // Limpiar lista
+            gridLibros.innerHTML = '';
+            
+            if (librosSubidos.length === 0) {
+                estadoVacio.style.display = 'flex';
+            } else {
+                estadoVacio.style.display = 'none';
+            }
+            
+            librosSubidos.forEach(libro => {
+                // Crear tarjeta para cada libro
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-libro';
+                tarjeta.innerHTML = `
+                    <div class="cabecera-libro">
+                        <div class="icono-libro">
+                            <i class="${libro.icono}"></i>
+                        </div>
+                        <div class="menu-libro">
+                            <button class="boton-menu" onclick="toggleMenuOpciones(event)">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="menu-opciones">
+                                <button class="opcion-menu" onclick="verDetallesLibro(${libro.id})">
+                                    <i class="fas fa-eye"></i>
+                                    Ver detalles
+                                </button>
+                                <button class="opcion-menu" onclick="descargarLibro(${libro.id})">
+                                    <i class="fas fa-download"></i>
+                                    Descargar
+                                </button>
+                                <button class="opcion-menu eliminar" onclick="eliminarLibro(${libro.id})">
+                                    <i class="fas fa-trash"></i>
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="titulo-libro">${libro.titulo}</h3>
+                    <div class="info-archivo-libro">
+                        <p>
+                            <i class="fas fa-user"></i>
+                            ${libro.autor}
+                        </p>
+                        <p>
+                            <i class="fas fa-tags"></i>
+                            ${libro.categoria}
+                        </p>
+                        <p>
+                            <i class="fas fa-graduation-cap"></i>
+                            ${libro.grado}
+                        </p>
+                        <p>
+                            <i class="fas fa-file"></i>
+                            ${libro.archivo.nombre} (${(libro.archivo.tamaño / 1024 / 1024).toFixed(2)} MB)
+                        </p>
+                    </div>
+                    <p class="descripcion-libro">
+                        ${libro.descripcion}
+                    </p>
+                    <div class="acciones-libro">
+                        <button class="boton-accion boton-leer" onclick="abrirLector('${libro.id}')">
+                            <i class="fas fa-book-open"></i>
+                            Leer
+                        </button>
+                    </div>
+                `;
+                gridLibros.appendChild(tarjeta);
+            });
+        }
+
+        // ABRIR LECTOR
+        function abrirLector(idLibro) {
+            const libro = librosSubidos.find(libro => libro.id === idLibro);
+            if (libro) {
+                document.getElementById('tituloLibroModal').innerHTML = libro.titulo;
+                document.getElementById('contenidoLibro').innerHTML = libro.contenido;
+                document.getElementById('modalLector').style.display = 'flex';
+            }
+        }
+
+        // CERRAR LECTOR
+        function cerrarLector() {
+            document.getElementById('modalLector').style.display = 'none';
+        }
+
+        // LIMPIAR FORMULARIO
+        function limpiarFormulario() {
+            document.getElementById('formularioLibro').reset();
+            document.getElementById('previewContenido').style.display = 'none';
+            document.getElementById('infoArchivo').style.display = 'none';
+            document.querySelector('.boton-archivo').innerHTML = `
+                Seleccionar archivo
+                <i class="fas fa-cloud-upload-alt"></i>
+            `;
+            document.querySelector('.boton-archivo').style.background = 'var(--color-biblioteca)';
+        }
+
+        // DESCARGAR LIBRO
+        function descargarLibro(idLibro) {
+            const libro = librosSubidos.find(libro => libro.id === idLibro);
+            if (libro) {
+                const enlace = document.createElement('a');
+                enlace.href = URL.createObjectURL(new Blob([libro.contenido], { type: libro.archivo.tipo }));
+                enlace.download = libro.archivo.nombre;
+                document.body.appendChild(enlace);
+                enlace.click();
+                document.body.removeChild(enlace);
+            }
+        }
+
+        // VER DETALLES DEL LIBRO
+        function verDetallesLibro(idLibro) {
+            const libro = librosSubidos.find(libro => libro.id === idLibro);
+            if (libro) {
+                Swal.fire({
+                    title: libro.titulo,
+                    html: `
+                        <p><strong>Autor:</strong> ${libro.autor}</p>
+                        <p><strong>Categoría:</strong> ${libro.categoria}</p>
+                        <p><strong>Grado educativo:</strong> ${libro.grado}</p>
+                        <p><strong>Tamaño del archivo:</strong> ${(libro.archivo.tamaño / 1024 / 1024).toFixed(2)} MB</p>
+                        <p><strong>Descripción:</strong></p>
+                        <p>${libro.descripcion}</p>
+                    `,
+                    icon: 'info',
+                    confirmButtonColor: '#4caf50',
+                    width: 600,
+                    padding: '2rem',
+                    backdrop: `rgba(0,0,123,0.4)`
+                });
+            }
+        }
+
+        // ELIMINAR LIBRO
+        function eliminarLibro(idLibro) {
+            const libroIndex = librosSubidos.findIndex(libro => libro.id === idLibro);
+            if (libroIndex !== -1) {
+                librosSubidos.splice(libroIndex, 1);
+                localStorage.setItem('librosSubidos', JSON.stringify(librosSubidos));
+                mostrarLibros();
+                
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: 'El libro ha sido eliminado de tu biblioteca',
+                    icon: 'success',
+                    confirmButtonColor: '#4caf50',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
+        }
+
+        // TOGGLE MENU OPCIONES
+        function toggleMenuOpciones(event) {
+            const menu = event.currentTarget.nextElementSibling;
+            const todosLosMenus = document.querySelectorAll('.menu-opciones');
+            
+            // Cerrar otros menús abiertos
+            todosLosMenus.forEach(m => {
+                if (m !== menu) {
+                    m.style.display = 'none';
+                }
+            });
+            
+            // Toggle del menú actual
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // OBTENER ÍCONO POR CATEGORÍA
+        function obtenerIconoPorCategoria(categoria) {
+            const iconos = {
+                'cuentos': 'fas fa-book-open',
+                'matematicas': 'fas fa-calculator',
+                'ciencias': 'fas fa-flask',
+                'historia': 'fas fa-globe',
+                'geografia': 'fas fa-map',
+                'ingles': 'fas fa-comments',
+                'literatura': 'fas fa-pen',
+                'filosofia': 'fas fa-brain',
+                'arte': 'fas fa-paint-brush',
+                'musica': 'fas fa-music'
+            };
+            return iconos[categoria] || 'fas fa-book';
+        }
+
+        // LEER ARCHIVO COMO TEXTO
+        function leerArchivoComoTexto(archivo) {
+            return new Promise((resolve, reject) => {
+                const lector = new FileReader();
+                lector.onload = (e) => resolve(e.target.result);
+                lector.onerror = (e) => reject(e);
+                lector.readAsText(archivo);
+            });
+        }
+    </script>
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Sitio - Biblioteca</title>
+    <link rel="stylesheet" href="css/styles.css">
+</a>
+</body>
+</html>
